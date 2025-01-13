@@ -1,0 +1,93 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider     = "postgresql"
+  url          = env("DATABASE_URL")
+  relationMode = "foreignKeys"
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  Employee  Employee?
+}
+
+model Employee {
+  id                String    @id @default(uuid())
+  userId            String    @unique
+  user              User      @relation(fields: [userId], references: [id])
+  firstName         String
+  lastName          String
+  dateOfBirth       DateTime
+  age               Int
+  role              Role      @default(EMPLOYEE)
+  gender            Gender    @default(MALE)
+  phone             String
+  isPhoneVerified   Boolean   @default(false)
+  isWorking         Boolean   @default(true)
+  hireDate          DateTime
+  resignationDate   DateTime?
+  resignationReason String?
+  address           Address?
+  leaves            Leaves[]
+  salary            Salary[]
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
+
+model Salary {
+  id         String   @id @default(uuid())
+  baseSalary Float
+  bonus      Float
+  date       DateTime
+  employeeId String
+  employee   Employee @relation(fields: [employeeId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Leaves {
+  id         String    @id @default(uuid())
+  leaveType  LeaveType
+  startDate  DateTime
+  endDate    DateTime
+  days       Int
+  employeeId String
+  employee   Employee  @relation(fields: [employeeId], references: [id])
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+}
+
+model Address {
+  id         String   @id @default(uuid())
+  line1      String
+  line2      String?
+  city       String
+  state      String
+  zip        String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  employeeId String   @unique
+  employee   Employee @relation(fields: [employeeId], references: [id])
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Role {
+  ADMIN
+  EMPLOYEE
+}
+
+enum LeaveType {
+  SICK
+  VACATION
+  OTHER
+}
